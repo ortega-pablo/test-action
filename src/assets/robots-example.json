@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "name": "Robot 1",
+    "connectionStatus": "Conectado",
+    "batteryLevel": "100%"
+  },
+  {
+    "id": "2",
+    "name": "Robot 2",
+    "connectionStatus": "Desconectado",
+    "batteryLevel": "N/D"
+  }
+]

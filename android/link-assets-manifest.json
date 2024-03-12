@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Goldman-Bold.ttf",
+      "sha1": "6c5788bf5439e8e641f13419f6ce0b698adb9f43"
+    },
+    {
+      "path": "src/assets/fonts/Goldman-Regular.ttf",
+      "sha1": "e41f41bd7fdb360336ff2b419af5d2999fe022c5"
+    },
+    {
+      "path": "src/assets/fonts/andalemo.ttf",
+      "sha1": "953839b69c5bc047cb53efefc755dd21175a3a1d"
+    },
+    {
+      "path": "src/assets/fonts/dredd.otf",
+      "sha1": "9385a6c9b879f3638bc6f996db2bf9ea21000439"
+    }
+  ]
+}
