@@ -1,4 +1,4 @@
-name: Build Android .apk and make release
+name: Build Android apk
 
 on:
   pull_request_target:
