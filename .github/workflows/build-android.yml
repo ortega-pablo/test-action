@@ -3,14 +3,13 @@ name: Build Android .apk and make release
 on:
   pull_request_target:
     types: [closed]
+    branches: [main]
     paths-ignore:
       - '**.md'
-    # This will only run the action when the PR title starts with 'v'
-    title: '^v.*$'
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.title, 'v')
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +41,7 @@ jobs:
 
       - name: Set gradlew permissions
         run: chmod +x ./android/gradlew
-      
+
       - name: Build application
         run: |
           cd android
@@ -51,25 +50,9 @@ jobs:
       - name: Rename the .apk
         run: mv ./android/app/build/outputs/apk/debug/app-debug.apk ./veco_${{ github.event.pull_request.title }}.apk
 
-      # Creating and Uploading the releases
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Uploading the APK as an artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ github.event.pull_request.title }}
-          release_name: Release ${{ github.event.pull_request.title }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload_release_asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./veco_${{ github.event.pull_request.title }}.apk
-          asset_name: veco_${{ github.event.pull_request.title }}.apk
-          asset_content_type: application/vnd.android.package-archive
+          name: APK
+          path: ./veco_${{ github.event.pull_request.title }}.apk
