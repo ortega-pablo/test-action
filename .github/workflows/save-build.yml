@@ -13,8 +13,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: 'develop-builds'
+        
+      - name: Create develop-builds branch if not exists
+        run: |
+            git fetch
+            git checkout develop-builds || git checkout -b develop-builds
+            git push --set-upstream origin develop-builds
 
       - name: Download APK
         uses: actions/download-artifact@v4
