@@ -3,6 +3,7 @@ name: Build Android .apk and make release
 on:
   pull_request_target:
     types: [closed]
+    branches: [main]
     paths-ignore:
       - '**.md'
 
