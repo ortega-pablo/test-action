@@ -1,14 +1,8 @@
 name: Build Android .apk and make release
 
-run-name: 'Building the release'
-
-permissions:
-  contents: write
-
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [closed]
     paths-ignore:
       - '**.md'
     # This will only run the action when the PR title starts with 'v'
@@ -16,13 +10,12 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: 'releases'
 
       - name: Install Java
         uses: actions/setup-java@v4
@@ -53,18 +46,12 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Rename the .apk
-        run: mv ./android/app/build/outputs/apk/debug/app-debug.apk ./android/app/build/outputs/apk/debug/veco_${{ github.event.pull_request.title }}.apk
+        run: mv ./android/app/build/outputs/apk/debug/app-debug.apk ./veco_${{ github.event.pull_request.title }}.apk
 
       # Creating and Uploading the releases
-      - name: Upload Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: app
-          path: ./veco_${{ github.event.pull_request.title }}.apk
-
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v4
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
