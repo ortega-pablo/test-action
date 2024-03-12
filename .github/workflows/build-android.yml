@@ -1,0 +1,85 @@
+name: Build Android .apk and make release
+
+run-name: 'Building the release'
+
+permissions:
+  contents: write
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '**.md'
+    # This will only run the action when the PR title starts with 'v'
+    title: '^v.*$'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: 'releases'
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      # Node, Yarn and NPM
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Run Yarn Install
+        run: yarn install
+
+      - name: Bundle React Native code
+        run: |
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+      - name: Build application
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Rename the .apk
+        run: mv ./android/app/build/outputs/apk/debug/app-debug.apk ./android/app/build/outputs/apk/debug/veco_${{ github.event.pull_request.title }}.apk
+
+      # Creating and Uploading the releases
+      - name: Upload Files
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: ./veco_${{ github.event.pull_request.title }}.apk
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.pull_request.title }}
+          release_name: Release ${{ github.event.pull_request.title }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./veco_${{ github.event.pull_request.title }}.apk
+          asset_name: veco_${{ github.event.pull_request.title }}.apk
+          asset_content_type: application/vnd.android.package-archive
