@@ -49,16 +49,10 @@ jobs:
 
       - name: Rename the .apk
         run: mv ./android/app/build/outputs/apk/debug/app-debug.apk ./veco_${{ github.event.pull_request.title }}.apk
-        
-      - name: Create develop-builds branch if not exists
-        run: |
-            git fetch
-            git checkout develop-builds || git checkout -b develop-builds
 
-      - name: Move APK to develop-builds branch
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add ./veco_${{ github.event.pull_request.title }}.apk
-          git commit -m "Add APK from PR ${{ github.event.pull_request.title }}"
-          git push origin develop-builds
+      # Uploading the APK as an artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.pull_request.title }}
+          path: ./veco_${{ github.event.pull_request.title }}.apk
